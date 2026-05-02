@@ -11,6 +11,9 @@ const UnityCtx = createContext<UnityContextType | null>(null);
 // Context Provider
 export const UnityContextProvider = ({ children }: { children: React.ReactNode }) => {
     const unityContext = useUnityContext({
+        companyName: "Payosky Games",
+        productName: "Payosky Studio",
+        productVersion: "1.0",
         loaderUrl: "/PayoskyStudio/Build/PayoskyStudio.loader.js",
         dataUrl: "/PayoskyStudio/Build/PayoskyStudio.data.unityweb",
         frameworkUrl: "/PayoskyStudio/Build//PayoskyStudio.framework.js.unityweb",

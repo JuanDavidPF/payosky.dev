@@ -1,6 +1,7 @@
 "use client"
+import React, { useCallback, useEffect, useState } from "react";
 import { Unity } from "react-unity-webgl";
-import { useSharedUnityContext } from "./UnityContextProvider";
+import { useSharedUnityContext } from "../../Contexts/UnityContextProvider";
 
 export function PayoskyStudio() {
 
@@ -9,6 +10,7 @@ export function PayoskyStudio() {
   return (
     <Unity
       unityProvider={unityProvider}
+      devicePixelRatio={2}
       className="flex absolute w-full h-full "
       style={{ visibility: isLoaded ? "visible" : "hidden" }}
     />
