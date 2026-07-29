@@ -18,16 +18,6 @@ export const UnityContextProvider = ({ children }: { children: React.ReactNode }
         dataUrl: "/PayoskyStudio/Build/PayoskyStudio.data.unityweb",
         frameworkUrl: "/PayoskyStudio/Build//PayoskyStudio.framework.js.unityweb",
         codeUrl: "/PayoskyStudio/Build/PayoskyStudio.wasm.unityweb",
-        webglContextAttributes: {
-            alpha: true,
-            antialias: true,
-            depth: true,
-            failIfMajorPerformanceCaveat: true,
-            premultipliedAlpha: true,
-            preserveDrawingBuffer: true,
-            stencil: true,
-            desynchronized: true,
-        }
     });
 
     return (

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSharedUnityContext } from "@/app/Contexts/UnityContextProvider";
+import { useSharedUnityContext } from "@/src/contexts/UnityContextProvider";
 
-export function LoadingScreen() {
+export default function LoadingScreen() {
 
     const fadeOutDuration = 3;
     const { isLoaded } = useSharedUnityContext();
