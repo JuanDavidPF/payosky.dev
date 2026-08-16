@@ -1,71 +1,35 @@
-import { LocalizedText } from "@/src/localization/types";
+export type NavigationPageId =
+    | "about"
+    | "projects"
+    | "blog"
+    | "museum"
+    | "contact";
 
 export type NavigationPageType = {
-    id: string;
-    label: LocalizedText;
-    href: LocalizedText;
-    studioState: string;
+    id: NavigationPageId;
+    href: string
 };
 
 export const NavigationPages: NavigationPageType[] = [
     {
         id: "about",
-        studioState: "about",
-        href: {
-            en: "/about-me",
-            es: "/sobre-mi",
-        },
-        label: {
-            en: "About Me",
-            es: "Sobre mí",
-        },
+        href: "/about-me"
     },
     {
         id: "projects",
-        studioState: "projects",
-        href: {
-            en: "/projects",
-            es: "/proyectos",
-        },
-        label: {
-            en: "Projects",
-            es: "Proyectos",
-        },
+        href: "/projects"
     },
     {
         id: "blog",
-        studioState: "blog",
-        href: {
-            en: "/blog",
-            es: "/blog",
-        },
-        label: {
-            en: "Blog",
-            es: "Blog",
-        },
+        href: "/blog"
     },
     {
         id: "museum",
-        studioState: "museum",
-        href: {
-            en: "/museum",
-            es: "/museo",
-        },
-        label: {
-            en: "Museum",
-            es: "Museo",
-        },
+        href: "/museum"
     },
     {
         id: "contact",
-        studioState: "contact",
-        href: {
-            en: "/contact",
-            es: "/contacto",
-        },
-        label: {
-            en: "Contact",
-            es: "Contacto",
-        },
+        href: "/contact"
+
     },
 ];

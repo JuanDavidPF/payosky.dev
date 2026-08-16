@@ -1,19 +1,18 @@
 "use client"
 import Logo from "@/src/components/Logo/Logo";
+import { useLocale } from "@/src/contexts/LocaleContext";
 import { NavigationPageType } from "@/src/navigation/pages";
 import { Dropdown } from "@heroui/react/dropdown";
-import { Label } from "@heroui/react/label";
 import { Surface } from "@heroui/react/surface";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function LandscapeNavBar({ pages }: { pages: NavigationPageType[] }) {
+
     const router = useRouter();
     const pathname = usePathname();
-    const currentPage = pages.find(page =>
-        pathname === page.href.en ||
-        pathname.startsWith(`${page.href.en}/`)
-    )?.href.en;
+    const currentPage = pages.find(page => pathname === page.href || pathname.startsWith(`${page.href}/`))?.href;
+    const dictionary = useLocale().dictionary.navigation;
 
     return (
         <Surface className="min-h-full overflow-y-auto flex flex-col p-6 items-center" >
@@ -42,11 +41,11 @@ export default function LandscapeNavBar({ pages }: { pages: NavigationPageType[]
                     return (
                         <Dropdown.Item
                             key={page.id}
-                            id={page.href["en"]}
+                            id={page.href}
                             aria-label={page.id}
                             className="p-4 transition-colors duration-350 ease-in-out-cubic data-[selected=true]:bg-red-400"
                         >
-                            {page.label["en"]}
+                            {dictionary[page.id]}
                         </Dropdown.Item>
                     );
                 })}

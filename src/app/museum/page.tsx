@@ -1,10 +1,13 @@
+import getDictionary from "@/src/i18n/getDictionary";
+import getLocale from "@/src/i18n/getLocale";
 import { Label } from "@heroui/react/label";
 
-
-export default function Museum({ children }: { children: React.ReactNode }) {
+export default async function Museum() {
+    const locale = await getLocale();
+    const dictionary = getDictionary(locale);
     return (
         <Label >
-            Museum
+            {dictionary.navigation.museum}
         </Label>
     );
 }

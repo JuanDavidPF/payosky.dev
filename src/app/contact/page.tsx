@@ -1,10 +1,13 @@
+import getDictionary from "@/src/i18n/getDictionary";
+import getLocale from "@/src/i18n/getLocale";
 import { Label } from "@heroui/react/label";
 
-
-export default function Contact({ children }: { children: React.ReactNode }) {
+export default async function Contact() {
+    const locale = await getLocale();
+    const dictionary = getDictionary(locale);
     return (
         <Label >
-            contact
+            {dictionary.navigation.contact}
         </Label>
     );
 }
