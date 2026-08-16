@@ -1,27 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const locales = ["en", "es"];
-const defaultLocale = "en";
+const locales = ["en", "es"] as const;
 
-export function proxy(request: NextRequest) {
-    const host = request.headers.get("host") ?? "";
+type Locale = (typeof locales)[number];
 
-    // Remove the port
-    const hostname = host.split(":")[0];
+const defaultLocale: Locale = "en";
 
-    let locale = defaultLocale;
+function getLocaleFromHost(hostname: string): Locale | null {
+    const parts = hostname.split(".");
 
-    if (hostname.endsWith(".localhost")) {
-        const subdomain = hostname.split(".")[0];
+    // es.localhost
+    if (hostname.endsWith(".localhost") && parts.length >= 2) {
+        const subdomain = parts[0];
 
-        if (locales.includes(subdomain)) {
-            locale = subdomain;
+        if (locales.includes(subdomain as Locale)) {
+            return subdomain as Locale;
         }
     }
 
-    console.log("HOST HEADER:", host);
-    console.log("HOSTNAME:", hostname);
-    console.log("LOCALE:", locale);
+    // es.yourdomain.com
+    if (parts.length >= 3) {
+        const subdomain = parts[0];
+
+        if (locales.includes(subdomain as Locale)) {
+            return subdomain as Locale;
+        }
+    }
+
+    return null;
+}
+
+function getBrowserLocale(request: NextRequest): Locale {
+    const acceptLanguage = request.headers.get("accept-language");
+
+    if (!acceptLanguage) {
+        return defaultLocale;
+    }
+
+    const languages = acceptLanguage
+        .split(",")
+        .map((language) => language.split(";")[0].trim().toLowerCase());
+
+    for (const language of languages) {
+        if (language.startsWith("es")) {
+            return "es";
+        }
+
+        if (language.startsWith("en")) {
+            return "en";
+        }
+    }
+
+    return defaultLocale;
+}
+
+export function proxy(request: NextRequest) {
+    const host = request.headers.get("host") ?? "";
+    const hostname = host.split(":")[0];
+
+    const subdomainLocale = getLocaleFromHost(hostname);
+
+    const locale =
+        subdomainLocale ??
+        getBrowserLocale(request);
+
+    console.log({
+        host,
+        hostname,
+        subdomainLocale,
+        locale,
+    });
 
     const requestHeaders = new Headers(request.headers);
 

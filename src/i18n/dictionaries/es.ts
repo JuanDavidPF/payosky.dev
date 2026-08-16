@@ -4,7 +4,9 @@ export const es = {
         description:
             "Portafolio y espacio experimental de Juan Payán, desarrollador de videojuegos y programador.",
     },
-
+    loading: {
+        loading: "Cargando",
+    },
     navigation: {
         about: "Sobre mí",
         projects: "Proyectos",

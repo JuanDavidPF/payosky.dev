@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSharedUnityContext } from "@/src/contexts/UnityContextProvider";
+import { useLocale } from "@/src/contexts/LocaleContext";
 
 export default function LoadingScreen() {
 
+    const dictionary = useLocale().dictionary;
     const fadeOutDuration = 3;
     const { isLoaded } = useSharedUnityContext();
     const [visible, setVisible] = useState(true);
@@ -40,7 +42,7 @@ export default function LoadingScreen() {
                         ease: [0.83, 0, 0.17, 1],
                     }}
                 >
-                    <div className="text-white text-2xl font-bold">Loading...</div>
+                    <div className="text-white text-2xl font-bold">{dictionary.loading.loading}...</div>
 
                 </motion.div>
             )}

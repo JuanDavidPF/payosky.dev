@@ -4,7 +4,9 @@ export const en = {
         description:
             "Portfolio and playground for Juan Payán, a game developer and programmer.",
     },
-
+    loading: {
+        loading: "Loading",
+    },
     navigation: {
         about: "About Me",
         projects: "Projects",
