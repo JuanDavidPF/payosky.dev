@@ -39,7 +39,9 @@ function getBrowserLocale(request: NextRequest): Locale {
 
     const languages = acceptLanguage
         .split(",")
-        .map((language) => language.split(";")[0].trim().toLowerCase());
+        .map((language) =>
+            language.split(";")[0].trim().toLowerCase()
+        );
 
     for (const language of languages) {
         if (language.startsWith("es")) {
@@ -64,22 +66,21 @@ export function proxy(request: NextRequest) {
         subdomainLocale ??
         getBrowserLocale(request);
 
-    console.log({
-        host,
-        hostname,
-        subdomainLocale,
-        locale,
-    });
+    const pathname = request.nextUrl.pathname;
 
-    const requestHeaders = new Headers(request.headers);
+    // Don't rewrite if the URL already contains a locale.
+    if (
+        pathname === `/${locale}` ||
+        pathname.startsWith(`/${locale}/`)
+    ) {
+        return NextResponse.next();
+    }
 
-    requestHeaders.set("x-locale", locale);
+    const url = request.nextUrl.clone();
 
-    return NextResponse.next({
-        request: {
-            headers: requestHeaders,
-        },
-    });
+    url.pathname = `/${locale}${pathname}`;
+
+    return NextResponse.rewrite(url);
 }
 
 export const config = {
