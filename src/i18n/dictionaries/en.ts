@@ -14,4 +14,7 @@ export const en = {
         museum: "Museum",
         contact: "Contact",
     },
+    home: {
+        welcome: "Welcome"
+    },
 };

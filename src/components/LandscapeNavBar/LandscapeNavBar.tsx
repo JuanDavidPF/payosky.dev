@@ -17,12 +17,7 @@ export default function LandscapeNavBar({ pages }: { pages: NavigationPageType[]
     return (
         <Surface className="min-h-full overflow-y-auto flex flex-col p-6 items-center" >
             <Link href={"/"}>
-                <Logo
-                    draggable={false}
-                    variant="Logotype"
-                    width={200}
-                    height={200}
-                />
+                <Logo variant="logotype" />
             </Link>
             <Dropdown.Menu
                 aria-label="Main navigation"
@@ -36,15 +31,23 @@ export default function LandscapeNavBar({ pages }: { pages: NavigationPageType[]
                         router.push(key);
                     }}
             >
-
                 {pages.map((page) => {
                     return (
                         <Dropdown.Item
                             key={page.id}
                             id={page.href}
                             aria-label={page.id}
-                            className="p-4 transition-colors duration-350 ease-in-out-cubic data-[selected=true]:bg-red-400"
-                        >
+                            className="
+                                p-4
+                                font-medium
+                                transition-colors
+                                duration-350
+                                ease-in-out-cubic
+                                hover:bg-(--accent)/10
+                                data-[selected=true]:bg-(--accent)
+                                data-[selected=true]:text-accent-foreground
+                                data-[selected=true]:shadow-2xl
+                              ">
                             {dictionary[page.id]}
                         </Dropdown.Item>
                     );
