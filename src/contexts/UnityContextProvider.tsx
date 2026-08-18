@@ -15,9 +15,9 @@ export const UnityContextProvider = ({ children }: { children: React.ReactNode }
         productName: "Payosky Studio",
         productVersion: "1.0",
         loaderUrl: "/PayoskyStudio/Build/PayoskyStudio.loader.js",
-        dataUrl: "/PayoskyStudio/Build/PayoskyStudio.data.unityweb",
-        frameworkUrl: "/PayoskyStudio/Build//PayoskyStudio.framework.js.unityweb",
-        codeUrl: "/PayoskyStudio/Build/PayoskyStudio.wasm.unityweb",
+        dataUrl: "/PayoskyStudio/Build/PayoskyStudio.data.br",
+        frameworkUrl: "/PayoskyStudio/Build//PayoskyStudio.framework.js.br",
+        codeUrl: "/PayoskyStudio/Build/PayoskyStudio.wasm.br",
     });
 
     return (
