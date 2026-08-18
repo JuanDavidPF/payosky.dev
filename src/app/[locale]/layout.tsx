@@ -4,6 +4,7 @@ import PayoskyStudioUnity from "@/src/components/PayoskyStudioUnity/PayoskyStudi
 import { LocaleProvider } from "@/src/contexts/LocaleContext";
 import { Locale } from "@/src/i18n/types";
 import { NavigationPages } from "@/src/navigation/pages";
+import { notFound } from "next/navigation";
 
 const locales = ["en", "es"] as const;
 
@@ -13,10 +14,18 @@ export function generateStaticParams() {
     }));
 }
 
+function isLocale(locale: string): locale is Locale {
+    return locales.includes(locale as Locale);
+}
+
 export default async function LocaleLayout({ children, params, }: {
-    children: React.ReactNode; params: Promise<{ locale: Locale }>;
+    children: React.ReactNode; params: Promise<{ locale: string }>;
 }) {
     const { locale } = await params;
+
+    if (!isLocale(locale)) {
+        notFound();
+    }
 
     return (
         <LocaleProvider locale={locale}>
