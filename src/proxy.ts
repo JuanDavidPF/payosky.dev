@@ -3,23 +3,19 @@ import { NextRequest, NextResponse } from "next/server";
 const locales = ["en", "es"] as const;
 
 type Locale = (typeof locales)[number];
+type LocalePreference = Locale | "auto";
 
 const defaultLocale: Locale = "en";
 const rootDomain = "payosky.dev";
+const localePreferenceCookie = "localePreference";
+const localeHandoffParam = "__locale_handoff";
 
 function isLocale(value: string): value is Locale {
     return locales.includes(value as Locale);
 }
 
-function getHostname(request: NextRequest): string {
-    return (
-        request.headers.get("host") ??
-        request.nextUrl.hostname ??
-        ""
-    )
-        .split(":")[0]
-        .toLowerCase()
-        .replace(/^www\./, "");
+function isLocalePreference(value: string): value is LocalePreference {
+    return value === "auto" || isLocale(value);
 }
 
 function getLocaleFromBrowser(request: NextRequest): Locale {
@@ -37,83 +33,123 @@ function getLocaleFromBrowser(request: NextRequest): Locale {
 
     const language = preferredLanguage.split("-")[0];
 
-    return isLocale(language)
-        ? language
-        : defaultLocale;
+    return isLocale(language) ? language : defaultLocale;
 }
 
-function getLocale(request: NextRequest): Locale {
-    const hostname = getHostname(request);
+function getLocalePreference(request: NextRequest): LocalePreference {
+    const value = request.cookies.get(localePreferenceCookie,)?.value;
 
-    // Local development:
-    // localhost
-    // es.localhost
-    // en.localhost
-    if (
-        hostname === "localhost" ||
-        hostname.endsWith(".localhost")
-    ) {
-        if (hostname === "localhost") {
-            return getLocaleFromBrowser(request);
-        }
-
-        const subdomain = hostname.split(".")[0];
-
-        return isLocale(subdomain)
-            ? subdomain
-            : defaultLocale;
+    if (value && isLocalePreference(value)) {
+        return value;
     }
 
-    // Production root domain:
-    // payosky.dev
-    if (hostname === rootDomain) {
-        return getLocaleFromBrowser(request);
+    return "auto";
+}
+
+function resolveLocale(request: NextRequest): Locale {
+    const preference = getLocalePreference(request);
+
+    if (isLocale(preference)) {
+        return preference;
     }
 
-    // Production subdomain:
-    // es.payosky.dev
-    // en.payosky.dev
-    // fr.payosky.dev
-    if (hostname.endsWith(`.${rootDomain}`)) {
-        const subdomain = hostname.slice(
-            0,
-            -(rootDomain.length + 1)
-        );
-
-        return isLocale(subdomain)
-            ? subdomain
-            : defaultLocale;
-    }
-
-    // Vercel previews / unknown domains:
-    // use browser preference.
     return getLocaleFromBrowser(request);
+}
+
+function setLocalePreferenceCookie(response: NextResponse, preference: LocalePreference) {
+    response.cookies.set(
+        localePreferenceCookie,
+        preference,
+        {
+            path: "/",
+            sameSite: "lax",
+            maxAge:
+                60 *
+                60 *
+                24 *
+                365,
+            secure: process.env.NODE_ENV === "production",
+            ...(process.env.NODE_ENV === "production" ? { domain: rootDomain } : {})
+        }
+    );
 }
 
 export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Prevent:
-    // /en/foo -> /en/en/foo
-    // /es/foo -> /es/es/foo
-    const pathnameHasLocale = locales.some(
-        (locale) =>
-            pathname === `/${locale}` ||
-            pathname.startsWith(`/${locale}/`)
-    );
+    /*
+     * ---------------------------------------------------------
+     * 1. HANDLE LOCALE HANDOFF
+     * ---------------------------------------------------------
+     *
+     * next.config.ts already changed:
+     *
+     * es.localhost
+     *      ↓
+     * localhost?__locale_handoff=es
+     *
+     * or:
+     *
+     * www.es.payosky.dev
+     *      ↓
+     * www.payosky.dev?__locale_handoff=es
+     *
+     * We are now safely on the canonical host.
+     */
 
-    if (pathnameHasLocale) {
-        return NextResponse.next();
+    const handoffLocale = request.nextUrl.searchParams.get(localeHandoffParam,);
+
+    if (handoffLocale && isLocale(handoffLocale)) {
+
+        const cleanUrl = request.nextUrl.clone();
+        cleanUrl.searchParams.delete(localeHandoffParam);
+
+        const response = NextResponse.redirect(cleanUrl);
+        setLocalePreferenceCookie(response, handoffLocale);
+
+        return response;
     }
 
-    const locale = getLocale(request);
+    /*
+     * ---------------------------------------------------------
+     * 2. RESOLVE CURRENT LOCALE
+     * ---------------------------------------------------------
+     */
+
+    const locale = resolveLocale(request);
+
+    /*
+     * ---------------------------------------------------------
+     * 3. DON'T ADD LOCALE TWICE
+     * ---------------------------------------------------------
+     */
+
+    const pathnameHasLocale = locales.some(
+        (supportedLocale) => {
+            pathname === `/${supportedLocale}` || pathname.startsWith(`/${supportedLocale}/`)
+        }
+    );
+
+    if (pathnameHasLocale) return NextResponse.next();
+
+
+    /*
+     * ---------------------------------------------------------
+     * 4. INTERNAL LOCALE REWRITE
+     * ---------------------------------------------------------
+     *
+     * Browser sees:
+     *
+     * localhost:3000/game
+     *
+     * Next serves:
+     *
+     * /es/game
+     */
 
     const url = request.nextUrl.clone();
 
-    url.pathname =
-        pathname === "/"
-            ? `/${locale}`
-            : `/${locale}${pathname}`;
+    url.pathname = pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
 
     return NextResponse.rewrite(url);
 }
