@@ -2,8 +2,7 @@ export type NavigationPageId =
     | "about"
     | "projects"
     | "blog"
-    | "museum"
-    | "contact";
+    | "museum";
 
 export type NavigationPageType = {
     id: NavigationPageId;
@@ -26,10 +25,5 @@ export const NavigationPages: NavigationPageType[] = [
     {
         id: "museum",
         href: "/museum"
-    },
-    {
-        id: "contact",
-        href: "/contact"
-
     },
 ];
