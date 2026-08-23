@@ -1,4 +1,4 @@
-import { useLocale } from "@/src/contexts/LocaleContext";
+import { Locale } from "@/src/i18n/types";
 import { NavigationPageId, NavigationPageType } from "@/src/navigation/pages";
 import Comment from "@gravity-ui/icons/Comment";
 import CommentFill from "@gravity-ui/icons/CommentFill";
@@ -9,6 +9,7 @@ import HeartFill from "@gravity-ui/icons/HeartFill";
 import Person from "@gravity-ui/icons/Person";
 import PersonFill from "@gravity-ui/icons/PersonFill";
 import { ListBox } from "@heroui/react/list-box";
+import Link from "next/link";
 import { ComponentType } from "react";
 
 const Icons: Record<NavigationPageId,
@@ -34,17 +35,19 @@ const Icons: Record<NavigationPageId,
     },
 };
 
-export default function LanscapeNavBarItem({ page, selected }: { page: NavigationPageType, selected: boolean }) {
+export default function LanscapeNavBarItem({ page, selected, locale, localizedLabel }:
+    { page: NavigationPageType, selected: boolean, locale: Locale, localizedLabel: string }) {
 
     const iconSet = Icons[page.id];
     const Icon = selected ? iconSet.selected : iconSet.unselected;
-    const dictionary = useLocale().dictionary.navigation;
 
     return (
         <ListBox.Item
             id={page.href}
             aria-label={page.id}
-            className="p-4
+            className="
+                   m-0
+                   p-0
                    font-medium
                    transition-colors
                    duration-350
@@ -53,7 +56,14 @@ export default function LanscapeNavBarItem({ page, selected }: { page: Navigatio
                    data-[selected=true]:bg-accent
                    data-[selected=true]:shadow-lg"
         >
-            <Icon />
-            {dictionary[page.id]}
-        </ListBox.Item>)
+            <Link
+                className="flex p-4 items-center gap-4 w-full m-0"
+                href={`/${locale}${page.href}`}
+                as={page.href}
+            >
+                <Icon />
+                {localizedLabel}
+            </Link>
+        </ListBox.Item>
+    )
 }
