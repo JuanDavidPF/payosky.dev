@@ -2,19 +2,22 @@ export const en = {
     metadata: {
         title: "Payosky Studio",
         description:
-            "Portfolio and playground for Juan Payán, a game developer and programmer.",
+            "Portfolio and playground for Juan Payán, a game developer and programmer."
     },
     loading: {
-        loading: "Loading",
+        loading: "Loading"
     },
     navigation: {
-        about: "About Me",
-        projects: "Projects",
-        blog: "Blog",
-        museum: "Museum",
-        contact: "Contact",
+        about: "Who am I?",
+        projects: "My Craft",
+        blog: "My Mind",
+        museum: "My Soul"
     },
-    home: {
-        welcome: "Welcome"
-    },
+    parameters: "Parameters",
+    languages: {
+        language: "Language",
+        english: "English",
+        spanish: "Spanish",
+        system: "System"
+    }
 };

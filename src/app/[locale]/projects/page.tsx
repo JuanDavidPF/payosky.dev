@@ -1,21 +1,11 @@
-import getDictionary from "@/src/i18n/getDictionary";
-import { Locale } from "@/src/i18n/types";
+import PageTitle from "@/src/components/PageTitle/PageTitle";
 import { Surface } from "@heroui/react/surface";
 
-export default async function ProjectsPage({
-    params,
-}: {
-    params: Promise<{ locale: Locale }>;
-}) {
-    const { locale } = await params;
-
-    const dictionary = getDictionary(locale);
+export default function ProjectsPage() {
 
     return (
         <Surface variant="transparent" className="flex-1">
-            <h1 className="text-4xl font-black">
-                {dictionary.navigation.projects}
-            </h1>
+            <PageTitle pageId="projects" />
         </Surface>
     );
 }

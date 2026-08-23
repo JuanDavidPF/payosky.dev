@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
 
     async redirects() {
         return [
+            {
+                source: "/",
+                destination: "/about-me",
+                permanent: true,
+            },
             /*
              * ---------------------------------------------------------
              * LOCAL DEVELOPMENT
@@ -67,7 +72,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "http://localhost:3000/:path*?__locale_handoff=es",
-                permanent: false,
+                permanent: true,
             },
 
             {
@@ -80,7 +85,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "http://localhost:3000/:path*?__locale_handoff=en",
-                permanent: false,
+                permanent: true,
             },
 
             /*
@@ -103,7 +108,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "https://www.payosky.dev/:path*?__locale_handoff=es",
-                permanent: false,
+                permanent: true,
             },
 
             {
@@ -116,7 +121,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "https://www.payosky.dev/:path*?__locale_handoff=en",
-                permanent: false,
+                permanent: true,
             },
 
             /*
@@ -133,7 +138,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "https://www.payosky.dev/:path*?__locale_handoff=es",
-                permanent: false,
+                permanent: true,
             },
 
             {
@@ -146,7 +151,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "https://www.payosky.dev/:path*?__locale_handoff=en",
-                permanent: false,
+                permanent: true,
             },
 
             /*
@@ -169,7 +174,7 @@ const nextConfig: NextConfig = {
                 ],
                 destination:
                     "https://www.payosky.dev/:path*",
-                permanent: false,
+                permanent: true,
             },
         ];
     },

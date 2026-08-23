@@ -7,7 +7,9 @@ type LocalePreference = Locale | "auto";
 
 const defaultLocale: Locale = "en";
 const rootDomain = "payosky.dev";
+
 const localePreferenceCookie = "localePreference";
+const routeLocaleCookie = "routeLocale";
 const localeHandoffParam = "__locale_handoff";
 
 function isLocale(value: string): value is Locale {
@@ -33,11 +35,13 @@ function getLocaleFromBrowser(request: NextRequest): Locale {
 
     const language = preferredLanguage.split("-")[0];
 
-    return isLocale(language) ? language : defaultLocale;
+    return isLocale(language)
+        ? language
+        : defaultLocale;
 }
 
 function getLocalePreference(request: NextRequest): LocalePreference {
-    const value = request.cookies.get(localePreferenceCookie,)?.value;
+    const value = request.cookies.get(localePreferenceCookie)?.value;
 
     if (value && isLocalePreference(value)) {
         return value;
@@ -46,7 +50,15 @@ function getLocalePreference(request: NextRequest): LocalePreference {
     return "auto";
 }
 
-function resolveLocale(request: NextRequest): Locale {
+function getRouteLocale(request: NextRequest): Locale | null {
+    const value = request.cookies.get(routeLocaleCookie)?.value;
+
+    return value && isLocale(value)
+        ? value
+        : null;
+}
+
+function resolvePreferredLocale(request: NextRequest): Locale {
     const preference = getLocalePreference(request);
 
     if (isLocale(preference)) {
@@ -56,22 +68,39 @@ function resolveLocale(request: NextRequest): Locale {
     return getLocaleFromBrowser(request);
 }
 
-function setLocalePreferenceCookie(response: NextResponse, preference: LocalePreference) {
-    response.cookies.set(
-        localePreferenceCookie,
-        preference,
-        {
-            path: "/",
-            sameSite: "lax",
-            maxAge:
-                60 *
-                60 *
-                24 *
-                365,
-            secure: process.env.NODE_ENV === "production",
-            ...(process.env.NODE_ENV === "production" ? { domain: rootDomain } : {})
-        }
-    );
+function isDocumentNavigation(request: NextRequest): boolean {
+    const destination = request.headers.get("sec-fetch-dest");
+    const mode = request.headers.get("sec-fetch-mode");
+
+    return destination === "document" || mode === "navigate";
+}
+
+function getCookieOptions() {
+    return {
+        path: "/",
+        sameSite: "lax" as const,
+        secure: process.env.NODE_ENV === "production",
+        ...(process.env.NODE_ENV === "production"
+            ? { domain: rootDomain }
+            : {}),
+    };
+}
+
+function setLocalePreferenceCookie(
+    response: NextResponse,
+    preference: LocalePreference,
+) {
+    response.cookies.set(localePreferenceCookie, preference, {
+        ...getCookieOptions(),
+        maxAge: 60 * 60 * 24 * 365,
+    });
+}
+
+function setRouteLocaleCookie(
+    response: NextResponse,
+    locale: Locale,
+) {
+    response.cookies.set(routeLocaleCookie, locale, getCookieOptions());
 }
 
 export function proxy(request: NextRequest) {
@@ -79,79 +108,89 @@ export function proxy(request: NextRequest) {
 
     /*
      * ---------------------------------------------------------
-     * 1. HANDLE LOCALE HANDOFF
+     * 1. HANDLE SUBDOMAIN HANDOFF
      * ---------------------------------------------------------
      *
-     * next.config.ts already changed:
+     * next.config.ts:
      *
      * es.localhost
      *      ↓
      * localhost?__locale_handoff=es
      *
-     * or:
-     *
      * www.es.payosky.dev
      *      ↓
      * www.payosky.dev?__locale_handoff=es
-     *
-     * We are now safely on the canonical host.
      */
-
-    const handoffLocale = request.nextUrl.searchParams.get(localeHandoffParam,);
+    const handoffLocale = request.nextUrl.searchParams.get(
+        localeHandoffParam
+    );
 
     if (handoffLocale && isLocale(handoffLocale)) {
-
         const cleanUrl = request.nextUrl.clone();
+
         cleanUrl.searchParams.delete(localeHandoffParam);
 
         const response = NextResponse.redirect(cleanUrl);
+
         setLocalePreferenceCookie(response, handoffLocale);
+        setRouteLocaleCookie(response, handoffLocale);
 
         return response;
     }
 
     /*
      * ---------------------------------------------------------
-     * 2. RESOLVE CURRENT LOCALE
+     * 2. DON'T PREFIX AN ALREADY LOCALIZED PATH
      * ---------------------------------------------------------
      */
-
-    const locale = resolveLocale(request);
-
-    /*
-     * ---------------------------------------------------------
-     * 3. DON'T ADD LOCALE TWICE
-     * ---------------------------------------------------------
-     */
-
     const pathnameHasLocale = locales.some(
-        (supportedLocale) => {
-            pathname === `/${supportedLocale}` || pathname.startsWith(`/${supportedLocale}/`)
-        }
+        (locale) =>
+            pathname === `/${locale}` ||
+            pathname.startsWith(`/${locale}/`)
     );
 
-    if (pathnameHasLocale) return NextResponse.next();
-
+    if (pathnameHasLocale) {
+        return NextResponse.next();
+    }
 
     /*
      * ---------------------------------------------------------
-     * 4. INTERNAL LOCALE REWRITE
+     * 3. RESOLVE ROUTING LOCALE
      * ---------------------------------------------------------
      *
-     * Browser sees:
+     * Client navigation:
+     * keep routeLocale stable.
      *
-     * localhost:3000/game
-     *
-     * Next serves:
-     *
-     * /es/game
+     * Full document navigation/reload:
+     * synchronize routeLocale with localePreference.
      */
+    let routeLocale = getRouteLocale(request);
+    let shouldUpdateRouteLocale = false;
 
+    if (!routeLocale || isDocumentNavigation(request)) {
+        routeLocale = resolvePreferredLocale(request);
+        shouldUpdateRouteLocale = true;
+    }
+
+    /*
+     * ---------------------------------------------------------
+     * 4. INTERNAL REWRITE
+     * ---------------------------------------------------------
+     */
     const url = request.nextUrl.clone();
 
-    url.pathname = pathname === "/" ? `/${locale}` : `/${locale}${pathname}`;
+    url.pathname =
+        pathname === "/"
+            ? `/${routeLocale}`
+            : `/${routeLocale}${pathname}`;
 
-    return NextResponse.rewrite(url);
+    const response = NextResponse.rewrite(url);
+
+    if (shouldUpdateRouteLocale) {
+        setRouteLocaleCookie(response, routeLocale);
+    }
+
+    return response;
 }
 
 export const config = {

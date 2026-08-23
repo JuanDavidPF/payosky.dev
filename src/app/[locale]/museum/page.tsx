@@ -1,21 +1,11 @@
-import getDictionary from "@/src/i18n/getDictionary";
-import { Locale } from "@/src/i18n/types";
+import PageTitle from "@/src/components/PageTitle/PageTitle";
 import { Surface } from "@heroui/react/surface";
 
-export default async function MuseumPage({
-    params,
-}: {
-    params: Promise<{ locale: Locale }>;
-}) {
-    const { locale } = await params;
-
-    const dictionary = getDictionary(locale);
+export default function MuseumPage() {
 
     return (
         <Surface variant="transparent" className="flex-1">
-            <h1 className="text-4xl font-black">
-                {dictionary.navigation.museum}
-            </h1>
+            <PageTitle pageId="museum" />
         </Surface>
     );
 }

@@ -1,27 +1,26 @@
 "use client"
 import Logo from "@/src/components/Logo/Logo";
-import { useLocale } from "@/src/contexts/LocaleContext";
+import ParametersPopOver from "@/src/components/ParametersPopOver/ParametersPopOver";
 import { NavigationPageType } from "@/src/navigation/pages";
-import { Dropdown } from "@heroui/react/dropdown";
+import { ListBox } from "@heroui/react/list-box";
+import { Separator } from "@heroui/react/separator";
 import { Surface } from "@heroui/react/surface";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import LanscapeNavBarItem from "./LandscapeNavBarItem";
 
 export default function LandscapeNavBar({ pages }: { pages: NavigationPageType[] }) {
 
     const router = useRouter();
     const pathname = usePathname();
     const currentPage = pages.find(page => pathname === page.href || pathname.startsWith(`${page.href}/`))?.href;
-    const dictionary = useLocale().dictionary.navigation;
 
     return (
-        <Surface className="min-h-full overflow-y-auto flex flex-col p-6 items-center" >
-            <Link href={"/"}>
-                <Logo variant="logotype" />
-            </Link>
-            <Dropdown.Menu
+        <Surface className="min-h-full w-3xs overflow-y-auto flex flex-col py-8 px-6 gap-4" >
+            <Logo variant="logotype" className="shrink-0 self-center" />
+            <Separator />
+            <ListBox
                 aria-label="Main navigation"
-                className="flex flex-col gap-4 mt-6 w-full"
+                className="flex flex-1 flex-col gap-4 mt-6 w-fullr"
                 selectionMode="single"
                 disallowEmptySelection={true}
                 selectedKeys={currentPage ? [currentPage] : []}
@@ -33,27 +32,17 @@ export default function LandscapeNavBar({ pages }: { pages: NavigationPageType[]
             >
                 {pages.map((page) => {
                     return (
-                        <Dropdown.Item
+                        <LanscapeNavBarItem
+                            page={page}
+                            selected={currentPage === page.href}
                             key={page.id}
-                            id={page.href}
-                            aria-label={page.id}
-                            className="
-                                p-4
-                                font-medium
-                                transition-colors
-                                duration-350
-                                ease-in-out-cubic
-                                hover:bg-(--accent)/10
-                                data-[selected=true]:bg-(--accent)
-                                data-[selected=true]:text-accent-foreground
-                                data-[selected=true]:shadow-2xl
-                              ">
-                            {dictionary[page.id]}
-                        </Dropdown.Item>
+                        />
                     );
-                })}
 
-            </Dropdown.Menu>
+                })}
+            </ListBox >
+            <Separator />
+            <ParametersPopOver />
         </Surface>
     );
 }
