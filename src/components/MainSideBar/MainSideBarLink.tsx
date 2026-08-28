@@ -36,7 +36,7 @@ const Icons: Record<NavigationPageId,
     },
 };
 
-export default function LanscapeNavBarItem({ page, selected, locale, localizedLabel, isCollapsed }:
+export default function MainSideBarLink({ page, selected, locale, localizedLabel, isCollapsed }:
     { page: NavigationPageType, selected: boolean, locale: Locale, localizedLabel: string, isCollapsed?: boolean }) {
 
     const iconSet = Icons[page.id];
@@ -61,7 +61,7 @@ export default function LanscapeNavBarItem({ page, selected, locale, localizedLa
                    data-[selected=true]:shadow-lg"
         >
             <Link
-                className={`flex p-4 items-center w-full m-0 overflow-hidden ${isCollapsed ? "justify-center" : "justify-start"}`}
+                className={`flex p-4 items-center w-full m-0 overflow-hidden gap-2 md:gap-4 ${isCollapsed ? "justify-center" : "justify-start"}`}
                 href={`/${locale}${page.href}`}
                 as={page.href}
             >
@@ -74,7 +74,6 @@ export default function LanscapeNavBarItem({ page, selected, locale, localizedLa
                     animate={{
                         opacity: isCollapsed ? 0 : 1,
                         maxWidth: isCollapsed ? 0 : 200,
-                        marginLeft: isCollapsed ? 0 : 16,
                         x: isCollapsed ? -8 : 0,
                     }}
                     transition={{
@@ -93,7 +92,7 @@ export default function LanscapeNavBarItem({ page, selected, locale, localizedLa
                             delay: isCollapsed ? 0 : 0.05,
                         },
                     }}
-                    className="overflow-hidden whitespace-nowrap"
+                    className={`overflow-hidden whitespace-nowrap ${isCollapsed ? "hidden" : "justify-start"}`}
                 >
                     {localizedLabel}
                 </motion.span>

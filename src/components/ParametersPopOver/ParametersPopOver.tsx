@@ -14,10 +14,9 @@ export default function ParametersPopOver({ collapsed }: { collapsed?: boolean }
     return (
         <Popover>
             <Button
-                size="lg"
                 fullWidth
                 variant="ghost"
-                className="shrink-0 gap-0 overflow-hidden "
+                className="shrink-0 overflow-hidden p-4 h-12 rounded-2x"
             >
                 <motion.div
                     layout
@@ -28,13 +27,13 @@ export default function ParametersPopOver({ collapsed }: { collapsed?: boolean }
                             damping: 45,
                         },
                     }}
-                    className={`flex w-full items-center overflow-hidden justify-center`}
+                    className={`flex w-full ${!collapsed ? "gap-2 md:gap-2" : "gap-0"} items-center overflow-hidden justify-center`}
                 >
                     <motion.div
                         layout="position"
                         className="flex shrink-0 items-center"
                     >
-                        <Gear />
+                        <Gear className="text-surface-foreground/60" />
                     </motion.div>
 
                     <motion.span
@@ -42,7 +41,6 @@ export default function ParametersPopOver({ collapsed }: { collapsed?: boolean }
                         animate={{
                             opacity: collapsed ? 0 : 1,
                             maxWidth: collapsed ? 0 : 200,
-                            marginLeft: collapsed ? 0 : 16,
                             x: collapsed ? -8 : 0,
                         }}
                         transition={{
@@ -53,21 +51,14 @@ export default function ParametersPopOver({ collapsed }: { collapsed?: boolean }
                             maxWidth: {
                                 duration: 0.25,
                             },
-                            marginLeft: {
-                                duration: 0.25,
-                            },
-                            x: {
-                                duration: 0.2,
-                                delay: collapsed ? 0 : 0.05,
-                            },
+
                         }}
-                        className="overflow-hidden whitespace-nowrap"
+                        className={`overflow-hidden whitespace-nowrap text-surface-foreground/60`}
                     >
                         {dictionary.parameters}
                     </motion.span>
                 </motion.div>
             </Button>
-
             <Popover.Content
                 className="min-w-xs max-w-md"
                 placement="top left"
