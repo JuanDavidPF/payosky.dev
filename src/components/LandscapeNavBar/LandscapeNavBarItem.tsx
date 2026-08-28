@@ -9,6 +9,7 @@ import HeartFill from "@gravity-ui/icons/HeartFill";
 import Person from "@gravity-ui/icons/Person";
 import PersonFill from "@gravity-ui/icons/PersonFill";
 import { ListBox } from "@heroui/react/list-box";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { ComponentType } from "react";
 
@@ -35,8 +36,8 @@ const Icons: Record<NavigationPageId,
     },
 };
 
-export default function LanscapeNavBarItem({ page, selected, locale, localizedLabel }:
-    { page: NavigationPageType, selected: boolean, locale: Locale, localizedLabel: string }) {
+export default function LanscapeNavBarItem({ page, selected, locale, localizedLabel, isCollapsed }:
+    { page: NavigationPageType, selected: boolean, locale: Locale, localizedLabel: string, isCollapsed?: boolean }) {
 
     const iconSet = Icons[page.id];
     const Icon = selected ? iconSet.selected : iconSet.unselected;
@@ -48,21 +49,54 @@ export default function LanscapeNavBarItem({ page, selected, locale, localizedLa
             className="
                    m-0
                    p-0
+                   h-13
                    font-medium
                    transition-colors
                    duration-350
                    ease-in-out-cubic
+                   text-surface-foreground/60
                    hover:bg-(--accent)/10
                    data-[selected=true]:bg-accent
+                   data-[selected=true]:text-surface-foreground
                    data-[selected=true]:shadow-lg"
         >
             <Link
-                className="flex p-4 items-center gap-4 w-full m-0"
+                className={`flex p-4 items-center w-full m-0 overflow-hidden ${isCollapsed ? "justify-center" : "justify-start"}`}
                 href={`/${locale}${page.href}`}
                 as={page.href}
             >
-                <Icon />
-                {localizedLabel}
+                <div className="shrink-0">
+                    <Icon />
+                </div>
+
+                <motion.span
+                    initial={false}
+                    animate={{
+                        opacity: isCollapsed ? 0 : 1,
+                        maxWidth: isCollapsed ? 0 : 200,
+                        marginLeft: isCollapsed ? 0 : 16,
+                        x: isCollapsed ? -8 : 0,
+                    }}
+                    transition={{
+                        opacity: {
+                            duration: 0.15,
+                            delay: isCollapsed ? 0 : 0.1,
+                        },
+                        maxWidth: {
+                            duration: 0.25,
+                        },
+                        marginLeft: {
+                            duration: 0.25,
+                        },
+                        x: {
+                            duration: 0.2,
+                            delay: isCollapsed ? 0 : 0.05,
+                        },
+                    }}
+                    className="overflow-hidden whitespace-nowrap"
+                >
+                    {localizedLabel}
+                </motion.span>
             </Link>
         </ListBox.Item>
     )

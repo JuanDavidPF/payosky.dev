@@ -5,18 +5,74 @@ import { Button } from "@heroui/react/button";
 import { Popover } from "@heroui/react/popover";
 import { Separator } from "@heroui/react/separator";
 import { Typography } from "@heroui/react/typography";
+import { motion } from "framer-motion";
 
-export default function ParametersPopOver() {
+export default function ParametersPopOver({ collapsed }: { collapsed?: boolean }) {
 
     const dictionary = useLocale().dictionary;
 
     return (
         <Popover>
-            <Button size="lg" fullWidth variant="ghost" className="shrink-0">
-                <Gear />
-                {dictionary.parameters}
+            <Button
+                size="lg"
+                fullWidth
+                variant="ghost"
+                className="shrink-0 gap-0 overflow-hidden "
+            >
+                <motion.div
+                    layout
+                    transition={{
+                        layout: {
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 45,
+                        },
+                    }}
+                    className={`flex w-full items-center overflow-hidden justify-center`}
+                >
+                    <motion.div
+                        layout="position"
+                        className="flex shrink-0 items-center"
+                    >
+                        <Gear />
+                    </motion.div>
+
+                    <motion.span
+                        initial={false}
+                        animate={{
+                            opacity: collapsed ? 0 : 1,
+                            maxWidth: collapsed ? 0 : 200,
+                            marginLeft: collapsed ? 0 : 16,
+                            x: collapsed ? -8 : 0,
+                        }}
+                        transition={{
+                            opacity: {
+                                duration: 0.15,
+                                delay: collapsed ? 0 : 0.1,
+                            },
+                            maxWidth: {
+                                duration: 0.25,
+                            },
+                            marginLeft: {
+                                duration: 0.25,
+                            },
+                            x: {
+                                duration: 0.2,
+                                delay: collapsed ? 0 : 0.05,
+                            },
+                        }}
+                        className="overflow-hidden whitespace-nowrap"
+                    >
+                        {dictionary.parameters}
+                    </motion.span>
+                </motion.div>
             </Button>
-            <Popover.Content className="min-w-xs max-w-md" placement="top left" offset={12} >
+
+            <Popover.Content
+                className="min-w-xs max-w-md"
+                placement="top left"
+                offset={12}
+            >
                 <Popover.Dialog className="flex flex-col gap-4 bg-surface-secondary">
                     <Typography type="h6" className="text-accent">
                         {dictionary.parameters}
