@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default function AboutPage() {
 
     return (
-        <section className="max-w-[75ch] flex flex-col gap-4 md:gap-8 md:mt-20 ">
+        <section className="max-w-[75ch] flex flex-col gap-6 md:gap-8 mt-8 md:mt-20">
             <AboutPageContent />
         </section>
     );

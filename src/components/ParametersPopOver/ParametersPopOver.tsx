@@ -27,7 +27,7 @@ export default function ParametersPopOver({ collapsed }: { collapsed?: boolean }
                             damping: 45,
                         },
                     }}
-                    className={`flex w-full ${!collapsed ? "gap-2 md:gap-2" : "gap-0"} items-center overflow-hidden justify-center`}
+                    className={`flex w-full ${!collapsed ? "gap-4" : "gap-0"} items-center overflow-hidden justify-center`}
                 >
                     <motion.div
                         layout="position"

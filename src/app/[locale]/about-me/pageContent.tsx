@@ -7,10 +7,10 @@ export default function AboutPageContent() {
 
     return (
         <>
-            <Typography type="h1" className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-shadow-lg self-center md:self-auto">
+            <Typography type="h1" className="text-4xl lg:text-6xl text-shadow-lg ">
                 {dictionary.pages.about.hero.title}
             </Typography>
-            <Typography type="body" className="text-sm md:text-xl leading-tight text-shadow-sm">
+            <Typography type="body" className="text-md md:text-xl text-shadow-sm font-medium">
                 {dictionary.pages.about.hero.body}
             </Typography>
         </>

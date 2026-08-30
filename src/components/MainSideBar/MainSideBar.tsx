@@ -1,23 +1,22 @@
 "use client";
 
-import Logo from "@/src/components/Logo/Logo";
 import ParametersPopOver from "@/src/components/ParametersPopOver/ParametersPopOver";
 import { useLocale } from "@/src/contexts/LocaleContext";
 import { NavigationPageType } from "@/src/navigation/pages";
 
-import { Button } from "@heroui/react/button";
 import { ListBox } from "@heroui/react/list-box";
 import { Separator } from "@heroui/react/separator";
 import { Surface } from "@heroui/react/surface";
 
-import { animate, AnimatePresence, motion, type PanInfo, useMotionValue } from "framer-motion";
+import { animate, motion, type PanInfo, useMotionValue } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainSideBarLink from "./MainSideBarLink";
 import MainSideBarSlideHandle from "./MainSideBarSlideHandle";
 import MainSidebarLogo from "./MainSideBarLogo";
 
-const MOBILE_BREAKPOINT = "(max-width: 767px)";
+const COLLAPSED_WIDTH = 96;
+const EXPANDED_WIDTH = 240;
 
 const DRAG_PREVIEW_DISTANCE = 80;
 const DRAG_TRIGGER_DISTANCE = 24;
@@ -33,24 +32,6 @@ const clamp = (value: number, min: number, max: number) => {
     return Math.min(Math.max(value, min), max);
 };
 
-const subscribeToMobile = (callback: () => void) => {
-    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT);
-
-    mediaQuery.addEventListener("change", callback);
-
-    return () => {
-        mediaQuery.removeEventListener("change", callback);
-    };
-};
-
-const getIsMobile = () => {
-    return window.matchMedia(MOBILE_BREAKPOINT).matches;
-};
-
-const getServerIsMobile = () => {
-    return true;
-};
-
 export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) {
     const pathname = usePathname();
 
@@ -62,76 +43,34 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
 
     const { dictionary, locale } = useLocale();
 
-    const isMobile = useSyncExternalStore(
-        subscribeToMobile,
-        getIsMobile,
-        getServerIsMobile
-    );
-
-    const [collapsedOverride, setCollapsedOverride] = useState<boolean | null>(null);
-
-    const isCollapsed = collapsedOverride ?? isMobile;
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const navigationRef = useRef<HTMLElement>(null);
 
-    const width = useMotionValue("var(--initial-width)");
+    const width = useMotionValue(EXPANDED_WIDTH);
 
-    const dragStartWidth = useRef(0);
-    const dragCollapsedWidth = useRef(0);
-    const dragExpandedWidth = useRef(0);
-    const dragOriginCollapsed = useRef(true);
+    const dragStartWidth = useRef(EXPANDED_WIDTH);
+    const dragOriginCollapsed = useRef(false);
     const dragCommitted = useRef(false);
     const previousUserSelect = useRef<string | null>(null);
 
-    const getNavigationWidths = () => {
-        if (!navigationRef.current) {
-            return null;
-        }
-
-        const styles = getComputedStyle(navigationRef.current);
-
-        return {
-            collapsed: parseFloat(
-                styles.getPropertyValue("--collapsed-width")
-            ),
-            expanded: parseFloat(
-                styles.getPropertyValue("--expanded-width")
-            ),
-        };
-    };
-
     const animateWidth = (targetWidth: number) => {
-        if (!navigationRef.current) {
-            return;
-        }
-
         width.stop();
-
-        const currentWidth =
-            navigationRef.current.getBoundingClientRect().width;
-
-        width.set(`${currentWidth}px`);
 
         animate(
             width,
-            `${targetWidth}px`,
+            targetWidth,
             SPRING_TRANSITION
         );
     };
 
     const setNavigationCollapsed = (collapsed: boolean) => {
-        const navigationWidth = getNavigationWidths();
-
-        if (!navigationWidth) {
-            return;
-        }
-
-        setCollapsedOverride(collapsed);
+        setIsCollapsed(collapsed);
 
         animateWidth(
             collapsed
-                ? navigationWidth.collapsed
-                : navigationWidth.expanded
+                ? COLLAPSED_WIDTH
+                : EXPANDED_WIDTH
         );
     };
 
@@ -158,20 +97,6 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
     };
 
     useEffect(() => {
-        if (collapsedOverride !== null) {
-            const navigationWidth = getNavigationWidths();
-
-            if (!navigationWidth) {
-                return;
-            }
-
-            width.stop();
-
-            width.set(`${isCollapsed ? navigationWidth.collapsed : navigationWidth.expanded}px`);
-        }
-    }, [isMobile, collapsedOverride, isCollapsed, width]);
-
-    useEffect(() => {
         return () => {
             if (previousUserSelect.current !== null) {
                 document.body.style.userSelect = previousUserSelect.current;
@@ -190,21 +115,13 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
             return;
         }
 
-        const navigationWidth = getNavigationWidths();
-
-        if (!navigationWidth) {
-            return;
-        }
-
         width.stop();
 
         const currentWidth = navigationRef.current.getBoundingClientRect().width;
 
-        width.set(`${currentWidth}px`);
+        width.set(currentWidth);
 
         dragStartWidth.current = currentWidth;
-        dragCollapsedWidth.current = navigationWidth.collapsed;
-        dragExpandedWidth.current = navigationWidth.expanded;
         dragOriginCollapsed.current = isCollapsed;
         dragCommitted.current = false;
 
@@ -217,24 +134,38 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
         const desiredWidth = dragStartWidth.current + info.offset.x;
 
         if (dragOriginCollapsed.current) {
+            const maximumDragWidth = Math.min(
+                EXPANDED_WIDTH,
+                dragStartWidth.current + DRAG_PREVIEW_DISTANCE
+            );
 
-            const maximumDragWidth = Math.min(dragExpandedWidth.current, dragStartWidth.current + DRAG_PREVIEW_DISTANCE);
-            const nextWidth = clamp(desiredWidth, dragCollapsedWidth.current, maximumDragWidth);
+            const nextWidth = clamp(
+                desiredWidth,
+                COLLAPSED_WIDTH,
+                maximumDragWidth
+            );
 
-            width.set(`${nextWidth}px`);
+            width.set(nextWidth);
 
             if (nextWidth >= maximumDragWidth) commitDrag(false);
 
             return;
         }
 
-        const minimumDragWidth = Math.max(dragCollapsedWidth.current, dragStartWidth.current - DRAG_PREVIEW_DISTANCE);
-        const nextWidth = clamp(desiredWidth, minimumDragWidth, dragExpandedWidth.current);
+        const minimumDragWidth = Math.max(
+            COLLAPSED_WIDTH,
+            dragStartWidth.current - DRAG_PREVIEW_DISTANCE
+        );
 
-        width.set(`${nextWidth}px`);
+        const nextWidth = clamp(
+            desiredWidth,
+            minimumDragWidth,
+            EXPANDED_WIDTH
+        );
+
+        width.set(nextWidth);
 
         if (nextWidth <= minimumDragWidth) commitDrag(true);
-
     };
 
     const handlePanEnd = (event: PointerEvent, info: PanInfo) => {
@@ -243,33 +174,35 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
         if (dragCommitted.current) return;
 
         if (dragOriginCollapsed.current) {
-            const shouldExpand = info.offset.x > DRAG_TRIGGER_DISTANCE || info.velocity.x > VELOCITY_THRESHOLD;
+            const shouldExpand =
+                info.offset.x > DRAG_TRIGGER_DISTANCE ||
+                info.velocity.x > VELOCITY_THRESHOLD;
+
             setNavigationCollapsed(!shouldExpand);
+
             return;
         }
 
-        const shouldCollapse = info.offset.x < -DRAG_TRIGGER_DISTANCE || info.velocity.x < -VELOCITY_THRESHOLD;
+        const shouldCollapse =
+            info.offset.x < -DRAG_TRIGGER_DISTANCE ||
+            info.velocity.x < -VELOCITY_THRESHOLD;
+
         setNavigationCollapsed(shouldCollapse);
     };
 
     return (
         <motion.aside
             ref={navigationRef}
-            className="
-                relative h-dvh shrink-0 overflow-visible
-                [--collapsed-width:64px]
-                [--expanded-width:148px]
-                [--initial-width:var(--collapsed-width)]
-                md:[--collapsed-width:96px]
-                md:[--expanded-width:240px]
-                md:[--initial-width:var(--expanded-width)]
-            "
+            className="relative shrink-0 overflow-visible hidden md:flex"
             style={{ width }}
         >
             <Surface className="drawer__dialog h-full w-full px-0 overflow-hidden">
-                <div className="h-full flex flex-col shrink-0 px-0 md:px-4">
+                <div className="h-full flex flex-col shrink-0 px-4">
                     <div className="drawer__header">
-                        <MainSidebarLogo isCollapsed={isCollapsed} onPressed={toggleNavigation} />
+                        <MainSidebarLogo
+                            isCollapsed={isCollapsed}
+                            onPressed={toggleNavigation}
+                        />
                         <Separator variant="tertiary" />
                     </div>
 

@@ -61,7 +61,7 @@ export default function MainSideBarLink({ page, selected, locale, localizedLabel
                    data-[selected=true]:shadow-lg"
         >
             <Link
-                className={`flex p-4 items-center w-full m-0 overflow-hidden gap-2 md:gap-4 ${isCollapsed ? "justify-center" : "justify-start"}`}
+                className={`flex p-4 items-center w-full m-0 overflow-hidden gap-4 ${isCollapsed ? "justify-center" : "justify-start"}`}
                 href={`/${locale}${page.href}`}
                 as={page.href}
             >

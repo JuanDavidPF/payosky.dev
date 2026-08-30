@@ -32,8 +32,8 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html className={fredoka.variable}>
-            <body className="antialiased dark bg-surface">
+          <html className={`${fredoka.variable} h-full overflow-hidden`}>
+            <body className="antialiased dark bg-surface w-full h-dvh overflow-hidden">
                 <UnityContextProvider>
                     {children}
                 </UnityContextProvider>

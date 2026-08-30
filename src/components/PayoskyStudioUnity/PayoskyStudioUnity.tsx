@@ -16,7 +16,7 @@ export default function PayoskyStudioUnity() {
       matchWebGLToCanvasSize
       devicePixelRatio={dpr}
       unityProvider={unityProvider}
-      className=" fixed w-full h-full "
+      className="absolute h-full w-full"
       style={{ visibility: isLoaded ? "visible" : "hidden" }}
     />
   );

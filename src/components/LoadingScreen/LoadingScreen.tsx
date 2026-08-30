@@ -14,7 +14,7 @@ export default function LoadingScreen() {
     return (
         <AnimatePresence>
             <motion.div
-                className="absolute inset-0 bg-accent flex justify-end p-16"
+                className={`absolute inset-0 bg-accent flex justify-end p-16 pointer-events-none z-0`}
                 style={{
                     "--mask-size": "-10%",
                     WebkitMaskImage:
@@ -31,7 +31,6 @@ export default function LoadingScreen() {
                 }}
             >
                 <div className="text-white text-2xl font-bold self-end">{dictionary.loading.loading}...</div>
-
             </motion.div>
         </AnimatePresence>
     );
