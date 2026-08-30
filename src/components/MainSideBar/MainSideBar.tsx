@@ -1,18 +1,16 @@
 "use client";
 
-import Logo from "@/src/components/Logo/Logo";
 import ParametersPopOver from "@/src/components/ParametersPopOver/ParametersPopOver";
-import { useLocale } from "@/src/contexts/LocaleContext";
-import { NavigationPageType } from "@/src/navigation/pages";
+import {useLocale} from "@/src/contexts/LocaleContext";
+import {NavigationPageType} from "@/src/navigation/pages";
 
-import { Button } from "@heroui/react/button";
-import { ListBox } from "@heroui/react/list-box";
-import { Separator } from "@heroui/react/separator";
-import { Surface } from "@heroui/react/surface";
+import {ListBox} from "@heroui/react/list-box";
+import {Separator} from "@heroui/react/separator";
+import {Surface} from "@heroui/react/surface";
 
-import { animate, AnimatePresence, motion, type PanInfo, useMotionValue } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {animate, motion, type PanInfo, useMotionValue} from "framer-motion";
+import {usePathname} from "next/navigation";
+import {useEffect, useRef, useState, useSyncExternalStore} from "react";
 import MainSideBarLink from "./MainSideBarLink";
 import MainSideBarSlideHandle from "./MainSideBarSlideHandle";
 import MainSidebarLogo from "./MainSideBarLogo";
@@ -51,7 +49,7 @@ const getServerIsMobile = () => {
     return true;
 };
 
-export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) {
+export default function MainSidebar({pages}: { pages: NavigationPageType[] }) {
     const pathname = usePathname();
 
     const currentPage = pages.find(
@@ -60,7 +58,7 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
             pathname.startsWith(`${page.href}/`)
     )?.href;
 
-    const { dictionary, locale } = useLocale();
+    const {dictionary, locale} = useLocale();
 
     const isMobile = useSyncExternalStore(
         subscribeToMobile,
@@ -264,13 +262,13 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
                 md:[--expanded-width:240px]
                 md:[--initial-width:var(--expanded-width)]
             "
-            style={{ width }}
+            style={{width}}
         >
             <Surface className="drawer__dialog h-full w-full px-0 overflow-hidden">
                 <div className="h-full flex flex-col shrink-0 px-0 md:px-4">
                     <div className="drawer__header">
-                        <MainSidebarLogo isCollapsed={isCollapsed} onPressed={toggleNavigation} />
-                        <Separator variant="tertiary" />
+                        <MainSidebarLogo isCollapsed={isCollapsed} onPressed={toggleNavigation}/>
+                        <Separator variant="tertiary"/>
                     </div>
 
                     <div className="drawer__body">
@@ -295,8 +293,8 @@ export default function MainSidebar({ pages }: { pages: NavigationPageType[] }) 
                     </div>
 
                     <div className="drawer__footer flex flex-col">
-                        <Separator variant="tertiary" />
-                        <ParametersPopOver collapsed={isCollapsed} />
+                        <Separator variant="tertiary"/>
+                        <ParametersPopOver collapsed={isCollapsed}/>
                     </div>
                 </div>
             </Surface>
